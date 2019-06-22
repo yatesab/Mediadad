@@ -4,6 +4,9 @@ import docker
 import os
 from halo import Halo
 
+################################################################################
+################################################################################
+
 class Service:
 
     def __init__(self):
@@ -74,6 +77,9 @@ class Service:
         except:
             self.spinner.fail("Service Failed To Backup")
 
+################################################################################
+################################################################################
+
 class Organizr(Service):
 
     def __init__(self):
@@ -83,6 +89,9 @@ class Organizr(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'}}
         self.env = {'TZ':  self.timezone}
         self.ports = {'80/tcp': 80, '443/tcp': 443}
+
+################################################################################
+################################################################################
 
 class SickRage(Service):
 
@@ -96,6 +105,9 @@ class SickRage(Service):
         self.env = {'TZ': self.timezone}
         self.ports = {'8081/tcp': 8081}
 
+################################################################################
+################################################################################
+
 class Tautulli(Service):
 
     def __init__(self):
@@ -106,6 +118,9 @@ class Tautulli(Service):
                         '/apps/plex/Library/Application\ Support/Plex\ Media\ Server/Logs': {'bind': '/plex_logs', 'mode': 'ro'}}
         self.env = {'TZ': self.timezone}
         self.ports = {'8181/tcp': 8181}
+
+################################################################################
+################################################################################
 
 class Plex(Service):
 
@@ -118,6 +133,9 @@ class Plex(Service):
                         '/local_media/transcode': {'bind': '/transcode', 'mode': 'rw'},
                         '/local_media': {'bind': '/local_media', 'mode': 'rw'}}
         self.env = {'TZ': self.timezone}
+
+################################################################################
+################################################################################
 
 class Transmission(Service):
 
@@ -164,6 +182,9 @@ class Transmission(Service):
     def updateContainer(self):
         super(Transmission, self).updateContainer()
         self.proxy.updateContainer()
+
+################################################################################
+################################################################################
 
 class TransmissionProxy(Service):
 
