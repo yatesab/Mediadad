@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import docker
+import os
 from halo import Halo
 
 class Service:
@@ -64,6 +65,14 @@ class Service:
             self.spinner.succeed("Service Updated")
         except:
             self.spinner.fail("Service Failed To Update")
+
+    def backupContainer(self):
+        try:
+            self.spinner.start("Backing Up Service - " + self.name)
+            os.system('cd /apps && tar -czf ./backup/'+self.name+'.tar.gz ./'+self.name)
+            self.spinner.succeed("Service Backup")
+        except:
+            self.spinner.fail("Service Failed To Backup")
 
 class Organizr(Service):
 

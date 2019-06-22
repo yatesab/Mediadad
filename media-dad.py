@@ -38,7 +38,8 @@ def getService(name):
 @click.option('-r/--run', 'run', default=False)
 @click.option('-s/--stop', 'stop', default=False)
 @click.option('-u/--update', 'update', default=False)
-def main(name, run, stop, update, convert):
+@click.option('-b/--backup', 'backup', default=False)
+def main(name, run, stop, update, backup):
 
     if run:
         #Run Service
@@ -48,6 +49,8 @@ def main(name, run, stop, update, convert):
         getService(name).stopContainer()
     if update:
         getService(name).updateContainer()
+    if backup:
+        getService(name).backupContainer()
     print("")
 
 if __name__ == '__main__':
