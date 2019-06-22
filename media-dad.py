@@ -7,37 +7,6 @@ import docker
 from bin.services import *
 from halo import Halo
 
-def convertFolder(path):
-    types = ['.mkv', '.avi' ]
-    count = 0
-    restNum = 5
-    restAmt = "1m"
-    spinner = Halo(spinner='dots')
-
-    for root, dirs, files in os.walk(path, topdown=False):
-        print ("In Folder: " + root)
-
-        for file in files:
-            for type in types:
-                if type in file:
-                    fileName = os.path.splitext(file)
-
-                    if fileName[1] == ".avi":
-                        convertcall = "./bin/ffmpeg -i '{0}/{1}{2}' -crf 20 '{0}/{1}.mp4'".format(root, fileName[0], fileName[1])
-                    if fileName[1] == ".mkv":
-                        convertcall = "./bin/ffmpeg -i '{0}/{1}{2}' -crf 20 '{0}/{1}.mp4'".format(root, fileName[0], fileName[1])
-                    count += 1
-
-                    if count == restNum:
-                        os.system("sleep " + restAmt)
-                        count = 0
-
-                    spinner.start("Converting " + file)
-                    os.system(convertcall)
-                    spinner.succeed("Converted " + file)
-
-        print ("---------")
-
 def getDadJoke():
     joke = os.system("curl -H 'Accept: text/plain' https://icanhazdadjoke.com/")
 
@@ -69,7 +38,6 @@ def getService(name):
 @click.option('-r/--run', 'run', default=False)
 @click.option('-s/--stop', 'stop', default=False)
 @click.option('-u/--update', 'update', default=False)
-@click.option('-c/--convert', 'convert', default=False)
 def main(name, run, stop, update, convert):
 
     if run:
@@ -80,8 +48,6 @@ def main(name, run, stop, update, convert):
         getService(name).stopContainer()
     if update:
         getService(name).updateContainer()
-    if convert:
-        convertFolder(name)
     print("")
 
 if __name__ == '__main__':

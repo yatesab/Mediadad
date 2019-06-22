@@ -83,7 +83,7 @@ class SickRage(Service):
         self.name = "sickrage"
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/local_media/downloads': {'bind': '/downloads', 'mode': 'rw'},
-                        '/local_media/tv_shows': {'bind': '/tv_shows', 'mode': 'rw'}}
+                        '/local_media/tv_shows': {'bind': '/tv', 'mode': 'rw'}}
         self.env = {'TZ': self.timezone}
         self.ports = {'8081/tcp': 8081}
 
@@ -143,6 +143,18 @@ class Transmission(Service):
     def runContainer(self):
         super(Transmission, self).runContainer()
         self.proxy.runContainer()
+
+    def stopContainer(self):
+        super(Transmission, self).stopContainer()
+        self.proxy.stopContainer()
+
+    def removeContainer(self):
+        super(Transmission, self).removeContainer()
+        self.proxy.removeContainer()
+
+    def updateContainer(self):
+        super(Transmission, self).updateContainer()
+        self.proxy.updateContainer()
 
 class TransmissionProxy(Service):
 
