@@ -1,2 +1,2 @@
-# Mediadad
-A father like figure for all your media needs
+# Media-Dad
+A father like figure to manage all your media needs.
