@@ -24,14 +24,14 @@ def printMediaDad():
 def getService(name):
     if name == "plex":
         return Plex()
-    if name == "organizr":
-        return Organizr()
     if name == "sickrage":
         return SickRage()
     if name == "tautulli":
         return Tautulli()
     if name == "transmission":
         return Transmission()
+    if name == "all":
+        return All()
 
 @click.command()
 @click.argument('name', nargs=1)
@@ -48,10 +48,12 @@ def main(name, run, stop, update, backup):
         #Stop Service
         getService(name).stopContainer()
     if update:
+        #Update Service
         getService(name).updateContainer()
     if backup:
+        #Backup Service
         getService(name).backupContainer()
-    print("")
+    print('')
 
 if __name__ == '__main__':
     printMediaDad()

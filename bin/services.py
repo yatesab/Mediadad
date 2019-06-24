@@ -27,7 +27,7 @@ class Service:
         self.removeContainer()
 
         try:
-            self.spinner.start("Starting " + self.name)
+            self.spinner.start(self.name + " - Starting")
             self.dockerClient.containers.run(
                 self.image,
                 name=self.name,
@@ -41,41 +41,41 @@ class Service:
                 links=self.links,
                 detach=True
             )
-            self.spinner.succeed(self.name + " Started")
+            self.spinner.succeed(self.name + " - Started")
         except:
-            self.spinner.fail(self.name + " Failed To Start")
+            self.spinner.fail(self.name + " - Failed To Start")
 
     def stopContainer(self):
         try:
-            self.spinner.start("Stopping Service - " + self.name)
+            self.spinner.start(self.name + " - Stopping")
             container = self.dockerClient.containers.get(self.name).stop()
-            self.spinner.succeed("Service Stopped")
+            self.spinner.succeed(self.name + " - Stopped")
         except:
-            self.spinner.fail("Service Was Not Stopped")
+            self.spinner.fail(self.name + " - Failed To Stop")
 
     def removeContainer(self):
         try:
-            self.spinner.start("Removing Service - " + self.name)
+            self.spinner.start(self.name + " - Removing")
             self.dockerClient.containers.get(self.name).remove()
-            self.spinner.succeed("Service Removed")
+            self.spinner.succeed(self.name + " - Removed")
         except:
-            self.spinner.fail("Service Was Not Removed")
+            self.spinner.fail(self.name + " - Failed To Removed")
 
     def updateContainer(self):
         try:
-            self.spinner.start("Updating Service - " + self.name)
+            self.spinner.start(self.name + " - Updating")
             self.dockerClient.containers.get(self.name).restart()
-            self.spinner.succeed("Service Updated")
+            self.spinner.succeed(self.name + " - Updated")
         except:
-            self.spinner.fail("Service Failed To Update")
+            self.spinner.fail(self.name + " - Failed To Update")
 
     def backupContainer(self):
         try:
-            self.spinner.start("Backing Up Service - " + self.name)
+            self.spinner.start(self.name + " - Backing Up")
             os.system('cd /apps && tar -czf ./backup/'+self.name+'.tar.gz ./'+self.name)
-            self.spinner.succeed("Service Backup")
+            self.spinner.succeed(self.name + " - Backed Up")
         except:
-            self.spinner.fail("Service Failed To Backup")
+            self.spinner.fail(self.name + " - Failed To Backup")
 
 ################################################################################
 ################################################################################
@@ -155,6 +155,7 @@ class Transmission(Service):
                     'OPENVPN_USERNAME': 'yatesab12_cq53bd',
                     'OPENVPN_PASSWORD': 'bsd7rwthc8',
                     'WEBPROXY_ENABLED': False,
+                    'LOCAL_NETWORK': '192.168.29.0/24',
                     'TRANSMISSION_DOWNLOAD_DIR': '/downloads/complete',
                     'TRANSMISSION_INCOMPLETE_DIR': '/downloads/incomplete',
                     'TRANSMISSION_RPC_AUTHENTICATION_REQUIRED': True,
@@ -163,8 +164,9 @@ class Transmission(Service):
                     'TRANSMISSION_SPEED_LIMIT_UP_ENABLED': True,
                     'TRANSMISSION_SPEED_LIMIT_UP': '0',
                     'TRANSMISSION_RATIO_LIMIT': '0',
-                    'TRANSMISSION_RATIO_LIMIT_ENABLED': True}
-        self.ports = {'9091/tcp': 9092, '8888/tcp': 8888}
+                    'TRANSMISSION_RATIO_LIMIT_ENABLED': True,
+                    'TRANSMISSION_DOWNLOAD_QUEUE_SIZE': '2'}
+        self.ports = {'9091/tcp': 9092}
         self.proxy = TransmissionProxy()
 
     def runContainer(self):
@@ -194,3 +196,38 @@ class TransmissionProxy(Service):
         self.name = "transmission-proxy"
         self.ports = {'8080/tcp': 9091}
         self.links = {'transmission': 'transmission'}
+
+################################################################################
+################################################################################
+
+class All():
+
+    services = { SickRage(), Tautulli(), Transmission(), Plex() }
+
+    def __init__(self):
+        super(All, self).__init__()
+
+    def runContainer(self):
+        for service in self.services:
+            service.runContainer()
+            print('')
+
+    def stopContainer(self):
+        for service in self.services:
+            service.stopContainer()
+            print('')
+
+    def removeContainer(self):
+        for service in self.services:
+            service.removeContainer()
+            print('')
+
+    def updateContainer(self):
+        for service in self.services:
+            service.updateContainer()
+            print('')
+
+    def backupContainer(self):
+        for service in self.services:
+            service.backupContainer()
+            print('')
