@@ -77,6 +77,26 @@ class Service:
         except:
             self.spinner.fail(self.name + " - Failed To Backup")
 
+    def syncBackup(self):
+        try:
+            #Check for backup folder and make sure its there
+            if [[ ! os.path.isdir("/apps/backup") ]]
+            then
+                self.spinner.start("No backup folder downloading now")
+#                os.system('cd /capps/backup && ./gdrive sync download 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo .')
+                self.spinner.succeed("Backup folder downloaded")
+            fi
+        except:
+            self.spinner.fail("Download Failed")
+
+
+        try:
+            self.spinner.start("Syncing Backups")
+#            os.system('cd /apps/backup && ./gdrive sync upload . 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo')
+            self.spinner.succeed("Synced Backups Successfully")
+        except:
+            self.spinner.fail("Sync Failed")
+
 ################################################################################
 ################################################################################
 
