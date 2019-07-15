@@ -1,11 +1,7 @@
 #!/usr/bin/python
 
-import os
-import subprocess
 import click
-import docker
 from bin.services import *
-from halo import Halo
 
 def getDadJoke():
     joke = os.system("curl -H 'Accept: text/plain' https://icanhazdadjoke.com/")
@@ -30,6 +26,12 @@ def getService(name):
         return Tautulli()
     if name == "transmission":
         return Transmission()
+    if name == "ombi":
+        return Ombi()
+    if name == "ouroboros":
+        return Ouroboros()
+    if name == "couchpotato":
+        return CouchPotato()
     if name == "all":
         return All()
 
@@ -43,16 +45,26 @@ def main(name, run, stop, update, backup):
 
     if run:
         #Run Service
+        getService(name).stopContainer()
+        getService(name).removeContainer()
         getService(name).runContainer()
+
     if stop:
         #Stop Service
         getService(name).stopContainer()
+        getService(name).removeContainer()
+
     if update:
         #Update Service
+        getService(name).stopContainer()
+        getService(name).removeContainer()
         getService(name).updateContainer()
+        getService(name).runContainer()
+
     if backup:
         #Backup Service
         getService(name).backupContainer()
+
     print('')
 
 if __name__ == '__main__':

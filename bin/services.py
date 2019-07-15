@@ -21,11 +21,9 @@ class Service:
         self.ports = {}
         self.volumes = {}
         self.links = {}
+        self.user = 1000
 
     def runContainer(self):
-        self.stopContainer()
-        self.removeContainer()
-
         try:
             self.spinner.start(self.name + " - Starting")
             self.dockerClient.containers.run(
@@ -43,7 +41,7 @@ class Service:
             )
             self.spinner.succeed(self.name + " - Started")
         except:
-            self.spinner.fail(self.name + " - Failed To Start")
+             self.spinner.fail(self.name + " - Failed To Start")
 
     def stopContainer(self):
         try:
@@ -64,7 +62,7 @@ class Service:
     def updateContainer(self):
         try:
             self.spinner.start(self.name + " - Updating")
-            self.dockerClient.containers.get(self.name).restart()
+            os.system('docker pull ' + self.image + ' > /dev/null')
             self.spinner.succeed(self.name + " - Updated")
         except:
             self.spinner.fail(self.name + " - Failed To Update")
@@ -72,43 +70,29 @@ class Service:
     def backupContainer(self):
         try:
             self.spinner.start(self.name + " - Backing Up")
-            os.system('cd /apps && tar -czf ./backup/'+self.name+'.tar.gz ./'+self.name)
+            os.system('cd /apps && tar -czf /local_media/backup/app_backup/'+self.name+'.tar.gz ./'+self.name)
             self.spinner.succeed(self.name + " - Backed Up")
         except:
             self.spinner.fail(self.name + " - Failed To Backup")
 
     def syncBackup(self):
         try:
+
             #Check for backup folder and make sure its there
-            if [[ ! os.path.isdir("/apps/backup") ]]
-            then
+            if os.path.isdir('/local_media/backup/app_backup'):
                 self.spinner.start("No backup folder downloading now")
-#                os.system('cd /capps/backup && ./gdrive sync download 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo .')
+                os.system('cd /local_media/backup && ./gdrive sync download 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo .')
                 self.spinner.succeed("Backup folder downloaded")
-            fi
         except:
             self.spinner.fail("Download Failed")
 
 
         try:
             self.spinner.start("Syncing Backups")
-#            os.system('cd /apps/backup && ./gdrive sync upload . 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo')
+            os.system('cd /apps/backup && ./gdrive sync upload . 1dAGxkrcwsVq6TLWqy5mp9cc2aXBRwepo')
             self.spinner.succeed("Synced Backups Successfully")
         except:
             self.spinner.fail("Sync Failed")
-
-################################################################################
-################################################################################
-
-class Organizr(Service):
-
-    def __init__(self):
-        super(Organizr, self).__init__()
-        self.image = "organizrtools/organizr-v2:latest"
-        self.name = "organizr"
-        self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'}}
-        self.env = {'TZ':  self.timezone}
-        self.ports = {'80/tcp': 80, '443/tcp': 443}
 
 ################################################################################
 ################################################################################
@@ -122,7 +106,9 @@ class SickRage(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/local_media/downloads': {'bind': '/downloads', 'mode': 'rw'},
                         '/local_media/tv_shows': {'bind': '/tv', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
         self.ports = {'8081/tcp': 8081}
 
 ################################################################################
@@ -136,8 +122,10 @@ class Tautulli(Service):
         self.name = "tautulli"
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/apps/plex/Library/Application\ Support/Plex\ Media\ Server/Logs': {'bind': '/plex_logs', 'mode': 'ro'}}
-        self.env = {'TZ': self.timezone}
         self.ports = {'8181/tcp': 8181}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -152,7 +140,9 @@ class Plex(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/local_media/transcode': {'bind': '/transcode', 'mode': 'rw'},
                         '/local_media': {'bind': '/local_media', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -185,7 +175,9 @@ class Transmission(Service):
                     'TRANSMISSION_SPEED_LIMIT_UP': '0',
                     'TRANSMISSION_RATIO_LIMIT': '0',
                     'TRANSMISSION_RATIO_LIMIT_ENABLED': True,
-                    'TRANSMISSION_DOWNLOAD_QUEUE_SIZE': '2'}
+                    'TRANSMISSION_DOWNLOAD_QUEUE_SIZE': '2',
+                    'PUID': self.user,
+                    'PGID': self.user}
         self.ports = {'9091/tcp': 9092}
         self.proxy = TransmissionProxy()
 
@@ -216,13 +208,61 @@ class TransmissionProxy(Service):
         self.name = "transmission-proxy"
         self.ports = {'8080/tcp': 9091}
         self.links = {'transmission': 'transmission'}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
+
+################################################################################
+################################################################################
+
+class Ombi(Service):
+
+    def __init__(self):
+        super(Ombi, self).__init__()
+        self.image = "linuxserver/ombi:latest"
+        self.name = "ombi"
+        self.ports = {'3579/tcp': 3579}
+        self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'}}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
+
+################################################################################
+################################################################################
+
+class Ouroboros(Service):
+
+    def __init__(self):
+        super(Ouroboros, self).__init__()
+        self.image = "pyouroboros/ouroboros:latest"
+        self.name = "ouroboros"
+        self.volumes = {'/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
+
+################################################################################
+################################################################################
+
+class CouchPotato(Service):
+
+    def __init__(self):
+        super(CouchPotato, self).__init__()
+        self.image = "couchpotato/couchpotato:latest"
+        self.name = "couchpotato"
+        self.volumes = {'/apps/'+self.name: {'bind': '/datadir', 'mode': 'rw'},
+                        '/local_media/movies': {'bind': '/media', 'mode': 'rw'}}
+        self.ports = {'5050/tcp': 5050}
+        self.env = {'TZ': self.timezone,
+                    'CP_UID': self.user,
+                    'CP_GID': self.user}
 
 ################################################################################
 ################################################################################
 
 class All():
 
-    services = { SickRage(), Tautulli(), Transmission(), Plex() }
+    services = { SickRage(), Tautulli(), Transmission(), Ombi(), CouchPotato, Plex() }
 
     def __init__(self):
         super(All, self).__init__()
