@@ -11,17 +11,19 @@ class Service:
 
     def __init__(self):
         self.dockerClient = docker.from_env()
+        self.user = 1000
+        self.timezone = "America/Denver"
         self.capAdd = {}
         self.network = "bridge"
         self.restartType = {'Name': 'always'}
-        self.timezone = "America/Denver"
-        self.env = {}
+        self.env = {'TZ': self.timezone,
+                    'PUID': self.user,
+                    'PGID': self.user}
         self.log = {}
         self.spinner = Halo(spinner='dots')
         self.ports = {}
         self.volumes = {}
         self.links = {}
-        self.user = 1000
 
     def runContainer(self):
         try:
@@ -106,9 +108,6 @@ class SickRage(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/local_media/downloads': {'bind': '/downloads', 'mode': 'rw'},
                         '/local_media/tv_shows': {'bind': '/tv', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
         self.ports = {'8081/tcp': 8081}
 
 ################################################################################
@@ -123,9 +122,6 @@ class Tautulli(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/apps/plex/Library/Application\ Support/Plex\ Media\ Server/Logs': {'bind': '/plex_logs', 'mode': 'ro'}}
         self.ports = {'8181/tcp': 8181}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -140,9 +136,6 @@ class Plex(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'},
                         '/local_media/transcode': {'bind': '/transcode', 'mode': 'rw'},
                         '/local_media': {'bind': '/local_media', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -158,8 +151,7 @@ class Transmission(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/data', 'mode': 'rw'},
                         '/local_media/downloads': {'bind': '/downloads', 'mode': 'rw'},
                         '/etc/localtime': {'bind': '/etc/localtime', 'mode': 'ro'}}
-        self.env = {'TZ': self.timezone,
-                    'CREATE_TUN_DEVICE': True,
+        self.env.update({'CREATE_TUN_DEVICE': True,
                     'OPENVPN_PROVIDER': 'WINDSCRIBE',
                     'OPENVPN_CONFIG': 'US-West-tcp',
                     'OPENVPN_USERNAME': 'yatesab12_cq53bd',
@@ -175,9 +167,7 @@ class Transmission(Service):
                     'TRANSMISSION_SPEED_LIMIT_UP': '0',
                     'TRANSMISSION_RATIO_LIMIT': '0',
                     'TRANSMISSION_RATIO_LIMIT_ENABLED': True,
-                    'TRANSMISSION_DOWNLOAD_QUEUE_SIZE': '2',
-                    'PUID': self.user,
-                    'PGID': self.user}
+                    'TRANSMISSION_DOWNLOAD_QUEUE_SIZE': '2'})
         self.ports = {'9091/tcp': 9092}
         self.proxy = TransmissionProxy()
 
@@ -208,9 +198,6 @@ class TransmissionProxy(Service):
         self.name = "transmission-proxy"
         self.ports = {'8080/tcp': 9091}
         self.links = {'transmission': 'transmission'}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -223,9 +210,6 @@ class Ombi(Service):
         self.name = "ombi"
         self.ports = {'3579/tcp': 3579}
         self.volumes = {'/apps/'+self.name: {'bind': '/config', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -237,9 +221,6 @@ class Ouroboros(Service):
         self.image = "pyouroboros/ouroboros:latest"
         self.name = "ouroboros"
         self.volumes = {'/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
-        self.env = {'TZ': self.timezone,
-                    'PUID': self.user,
-                    'PGID': self.user}
 
 ################################################################################
 ################################################################################
@@ -253,9 +234,6 @@ class CouchPotato(Service):
         self.volumes = {'/apps/'+self.name: {'bind': '/datadir', 'mode': 'rw'},
                         '/local_media/movies': {'bind': '/media', 'mode': 'rw'}}
         self.ports = {'5050/tcp': 5050}
-        self.env = {'TZ': self.timezone,
-                    'CP_UID': self.user,
-                    'CP_GID': self.user}
 
 ################################################################################
 ################################################################################
