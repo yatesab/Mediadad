@@ -48,7 +48,7 @@ class Service:
     def stopContainer(self):
         try:
             self.spinner.start(self.name + " - Stopping")
-            container = self.dockerClient.containers.get(self.name).stop()
+            self.dockerClient.containers.get(self.name).stop()
             self.spinner.succeed(self.name + " - Stopped")
         except:
             self.spinner.fail(self.name + " - Failed To Stop")
@@ -72,7 +72,7 @@ class Service:
     def backupContainer(self):
         try:
             self.spinner.start(self.name + " - Backing Up")
-            os.system('cd /apps && tar -czf /local_media/backup/app_backup/'+self.name+'.tar.gz ./'+self.name)
+            os.system('cd /apps && tar -czf /apps/backup/'+self.name+'.tar.gz ./'+self.name+' > /dev/null')
             self.spinner.succeed(self.name + " - Backed Up")
         except:
             self.spinner.fail(self.name + " - Failed To Backup")
